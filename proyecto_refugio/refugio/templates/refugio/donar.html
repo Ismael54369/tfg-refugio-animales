@@ -40,80 +40,22 @@
                 <form method="post" class="text-start fw-bold text-secondary">
                     {% csrf_token %}
                     
-                    <div class="payment-box mb-4 shadow-sm">
-                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">1. Detalles de la aportación</h5>
-                        <div class="mb-3">
-                            <label class="form-label text-dark">{{ form.cantidad.label }}</label>
-                            {{ form.cantidad }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-dark">{{ form.mensaje.label }}</label>
-                            {{ form.mensaje }}
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label text-dark">{{ form.cantidad.label }}</label>
+                        {{ form.cantidad }}
                     </div>
 
-                    <div class="payment-box shadow-sm">
-                        <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">2. Método de Pago</h5>
-                        <div class="text-center mb-3">
-                            <span class="secure-badge">🔒 Conexión SSL Cifrada (Entorno de Simulación)</span>
-                        </div>
-
-                        <ul class="nav nav-tabs mb-3" id="paymentTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="card-tab" data-bs-toggle="tab" data-bs-target="#card" type="button" role="tab">💳 Tarjeta</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="bizum-tab" data-bs-toggle="tab" data-bs-target="#bizum" type="button" role="tab">📱 Bizum</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="paypal-tab" data-bs-toggle="tab" data-bs-target="#paypal" type="button" role="tab">🅿️ PayPal</button>
-                            </li>
-                        </ul>
-
-                        <div class="tab-content" id="paymentTabsContent">
-                            
-                            <div class="tab-pane fade show active" id="card" role="tabpanel">
-                                <label class="text-muted small">Titular de la tarjeta</label>
-                                <input type="text" class="fake-input" placeholder="Ej: Ash Ketchum">
-                                
-                                <label class="text-muted small">Número de la tarjeta</label>
-                                <input type="text" class="fake-input" placeholder="0000 0000 0000 0000" maxlength="19">
-                                
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label class="text-muted small">Caducidad</label>
-                                        <input type="text" class="fake-input" placeholder="MM/AA" maxlength="5">
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="text-muted small">CVC</label>
-                                        <input type="text" class="fake-input" placeholder="123" maxlength="3">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="bizum" role="tabpanel">
-                                <div class="text-center py-3">
-                                    <p class="text-muted">Introduce tu número de teléfono vinculado a Bizum. Recibirás una notificación en tu app bancaria para autorizar el pago.</p>
-                                    <label class="text-muted small text-start w-100">Número de móvil</label>
-                                    <input type="tel" class="fake-input fw-bold" placeholder="+34 600 000 000">
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="paypal" role="tabpanel">
-                                <div class="text-center py-4">
-                                    <p class="text-muted mb-3">Serás redirigido a la plataforma segura de PayPal para completar tu donación.</p>
-                                    <div class="d-inline-block px-4 py-2 bg-light border rounded text-primary fw-bold">
-                                        Conectar con PayPal ↗
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label text-dark">{{ form.mensaje.label }}</label>
+                        {{ form.mensaje }}
+                        <div class="form-text text-muted small">{{ form.mensaje.help_text }}</div>
                     </div>
                     
                     <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-pokemon py-3 fs-4 shadow">❤️ CONFIRMAR PAGO</button>
-                        <small class="text-center text-muted mt-2">Al hacer clic, aceptas los términos y condiciones de la Refugidex.</small>
+                        <button type="submit" class="btn btn-pokemon py-3 fs-4 shadow">
+                            🔒 Pagar de forma segura con Stripe
+                        </button>
+                        <small class="text-center text-muted mt-2">Serás redirigido a la pasarela oficial.</small>
                     </div>
                 </form>
             </div>

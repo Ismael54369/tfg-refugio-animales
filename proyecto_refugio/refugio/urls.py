@@ -10,7 +10,10 @@ urlpatterns = [
     
     # Rutas de Adopción y Donación
     path('animal/<int:animal_id>/adoptar/', views.adoptar_animal, name='adoptar_animal'),
-    path('animal/<int:animal_id>/donar/', views.donar_animal, name='donar_animal'), # NUEVA RUTA
+    path('animal/<int:animal_id>/donar/', views.donar_animal, name='donar_animal'), 
+
+    path('donacion/exito/', views.pago_exitoso, name='pago_exitoso'),
+    path('donacion/cancelada/', views.pago_cancelado, name='pago_cancelado'),
 
     # Panel Privado (CRUD)
     path('mi-perfil/', views.mi_perfil, name='mi_perfil'),

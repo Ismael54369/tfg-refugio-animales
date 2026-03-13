@@ -1,46 +1,56 @@
 import os
 import django
 import random
+import requests
 from datetime import date, timedelta
-from io import BytesIO
-from PIL import Image
 from django.core.files.base import ContentFile
 
-# 1. Conexión con Django (Asegúrate de que el nombre coincida con tu manage.py)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from refugio.models import Especie, Rasgo, Animal, SolicitudAdopcion, Donacion
 
-def generar_foto_cuadrada(nombre, color_hex):
-    """Genera una imagen perfectamente cuadrada (1:1) de 800x800 px"""
-    img = Image.new('RGB', (800, 800), color=color_hex)
-    buffer = BytesIO()
-    img.save(buffer, format='PNG')
-    return ContentFile(buffer.getvalue(), f"{nombre.lower()}_perfil.png")
+def obtener_foto_real(nombre, nombre_especie, indice):
+    print(f"    📸 Descargando foto de {nombre_especie} para {nombre}...")
+    
+    # Traducimos tu especie a etiquetas de búsqueda precisas en inglés
+    diccionario_especies = {
+        "Perro": "dog,hound",
+        "Gato": "cat,kitten",
+        "Ave": "bird,parrot",
+        "Reptil": "reptile,lizard,iguana",
+        "Roedor": "hamster,mouse,guineapig",
+        "Exótico": "wildlife,exotic,animal"
+    }
+    
+    terminos_busqueda = diccionario_especies.get(nombre_especie, "pet")
+    
+    # Usamos el índice del bucle + un número aleatorio alto para garantizar que NUNCA se repitan
+    lock_id = indice + random.randint(10000, 99999)
+    url = f"https://loremflickr.com/800/800/{terminos_busqueda}?lock={lock_id}"
+    
+    respuesta = requests.get(url)
+    if respuesta.status_code == 200:
+        return ContentFile(respuesta.content, f"{nombre.lower()}_foto.jpg")
+    return None
 
 def sembrar_base_de_datos():
-    print("🧹 Limpiando registros antiguos por seguridad...")
+    print("🧹 Limpiando registros antiguos...")
     Donacion.objects.all().delete()
     SolicitudAdopcion.objects.all().delete()
     Animal.objects.all().delete()
     Rasgo.objects.all().delete()
     Especie.objects.all().delete()
 
-    # 2. Crear 6 Especies
     print("🐾 Creando Especies...")
     nombres_especies = ["Perro", "Gato", "Ave", "Reptil", "Roedor", "Exótico"]
-    especies = [Especie.objects.create(nombre=n, descripcion=f"Tipo de animal: {n}") for n in nombres_especies]
+    especies = [Especie.objects.create(nombre=n) for n in nombres_especies]
 
-    # 3. Crear 10 Rasgos
     print("✨ Creando Rasgos...")
-    nombres_rasgos = ["Energético", "Tranquilo", "Cariñoso", "Veloz", "Vacunado", 
-                      "Tímido", "Glotón", "Juguetón", "Protector", "Dormilón"]
+    nombres_rasgos = ["Energético", "Tranquilo", "Cariñoso", "Veloz", "Vacunado", "Juguetón"]
     rasgos = [Rasgo.objects.create(nombre=n) for n in nombres_rasgos]
 
-    # 4. Crear 30 Animales de forma dinámica
-    print("🔴 Capturando 30 animales y generando sus fotos 1:1...")
-    
+    print("🔴 Capturando 30 animales con fotos inteligentes (Tardará unos 30-40 segundos)...")
     nombres_pokemon = [
         "Bulbasaur", "Charmander", "Squirtle", "Pikachu", "Eevee", "Snorlax", 
         "Gengar", "Arcanine", "Meowth", "Psyduck", "Machop", "Jigglypuff", 
@@ -49,40 +59,27 @@ def sembrar_base_de_datos():
         "Gastly", "Onix", "Drowzee", "Krabby"
     ]
     
-    colores_hex = ["#F08030", "#F8D030", "#A8A878", "#C03028", "#A040A0", "#78C850", "#6890F0", "#F85888", "#E0C068", "#A890F0"]
-    estados_posibles = ['ADOPCION', 'REHAB', 'ADOPTADO']
-
-    for nombre in nombres_pokemon:
+    # Usamos enumerate para tener un índice (i) único por cada animal
+    for i, nombre in enumerate(nombres_pokemon):
         especie_random = random.choice(especies)
-        color_random = random.choice(colores_hex)
-        
-        # Le damos un 60% de probabilidad de estar en Adopción, 20% Rehab, 20% Adoptado
-        estado_random = random.choices(estados_posibles, weights=[60, 20, 20])[0] 
-        
-        # Fecha de nacimiento aleatoria en los últimos 5 años (1825 días)
-        dias_restar = random.randint(100, 1825)
-        fecha_nac = date.today() - timedelta(days=dias_restar)
-
-        # Aquí usamos "historia" en lugar de "descripcion"
         animal = Animal(
             nombre=nombre,
             especie=especie_random,
-            estado=estado_random,
-            historia=f"Este valiente {especie_random.nombre} llamado {nombre} fue encontrado explorando la Ruta 1. Necesita un buen entrenador.",
-            fecha_nacimiento=fecha_nac
+            estado=random.choices(['ADOPCION', 'REHAB', 'ADOPTADO'], weights=[60, 20, 20])[0],
+            historia=f"Este valiente {especie_random.nombre} llamado {nombre} necesita un buen hogar.",
+            fecha_nacimiento=date.today() - timedelta(days=random.randint(100, 1825))
         )
         
-        # Guardar la foto cuadrada automática
-        animal.foto.save(f"{nombre}.png", generar_foto_cuadrada(nombre, color_random), save=False)
+        # Le pasamos el nombre, la especie exacta y su número de índice único
+        foto_real = obtener_foto_real(nombre, especie_random.nombre, i)
+        if foto_real:
+            animal.foto.save(f"{nombre}.jpg", foto_real, save=False)
+            
         animal.save()
-        
-        # Añadir entre 2 y 4 rasgos aleatorios
-        rasgos_random = random.sample(rasgos, k=random.randint(2, 4))
-        animal.rasgos.set(rasgos_random)
-        
-        print(f"  -> {animal.nombre} registrado con éxito.")
+        animal.rasgos.set(random.sample(rasgos, k=random.randint(2, 4)))
+        print(f"  -> ✅ {animal.nombre} registrado correctamente.")
 
-    print("✅ ¡Siembra completada al 100%! Tienes 30 animales listos en tu base de datos PostgreSQL.")
+    print("🎉 ¡Siembra completada con éxito! Revisa tu Pokédex.")
 
 if __name__ == '__main__':
     sembrar_base_de_datos()

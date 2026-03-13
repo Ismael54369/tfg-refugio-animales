@@ -137,3 +137,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = 'lista_animales' # A dónde va tras loguearse
 LOGOUT_REDIRECT_URL = 'home'          # A dónde va tras salir
 LOGIN_URL = 'login'                   # La ruta de la página de login
+
+# CONFIGURACIÓN DE STRIPE
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
